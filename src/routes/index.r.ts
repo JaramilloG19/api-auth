@@ -8,6 +8,7 @@ const router = express.Router()
 
 fs.readdirSync(PATH_ROUTES).filter(async (file): Promise<void> => {
   const nameRouter = removeExtension(file)
+  console.log(nameRouter)
   nameRouter !== 'index' && router.use(`/${nameRouter}`, require(`./${file}`))
 })
 

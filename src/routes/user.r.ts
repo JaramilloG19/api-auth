@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import express from 'express'
-import { getUser } from '../controllers/user.c'
+import { getUserById, getUsers } from '../controllers/user.c'
 const router = express.Router()
 
-router.get('/', getUser)
+router.get('/', getUsers)
+
+router.get('/:id', getUserById)
 
 module.exports = router
