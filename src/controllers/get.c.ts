@@ -1,30 +1,23 @@
-import { API_URL } from '../config/environment'
+import { type Endpoint } from '../types/endpoint'
 import { type Request, type Response } from 'express'
+import { EndpointService } from '../services/endpoint.s'
 import { responseSuccess, responseError } from '../utils/response'
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
     const endpoint = req.query.endpoint as string
+    const endpointService = new EndpointService(endpoint as Endpoint)
 
     // Check if endpoint is provided
     if (typeof req.query.endpoint === 'undefined' || req.query.endpoint === '') {
       await responseError(res, 'Endpoint not found', null, 400)
       return
     }
-
-    const response = await fetch(`${API_URL}${endpoint}`).then(
-      async (response) => {
-        if (response.ok) {
-          return await response.json()
-        } else {
-          throw new Error('Error')
-        }
-      }
-    )
+    const response = await endpointService.getAll()
     await responseSuccess(res, `Get all ${endpoint} success`, response, 200)
     return
-  } catch (error) {
-    await responseError(res, `Get all ${req.query.endpoint as string} failed`, error)
+  } catch (error: any) {
+    await responseError(res, error?.message, null)
   }
 }
 
@@ -32,6 +25,7 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = req.query.id as string
     const endpoint = req.query.endpoint as string
+    const endpointService = new EndpointService(endpoint as Endpoint)
 
     // Check if endpoint is provided
     if (typeof req.query.endpoint === 'undefined' || req.query.endpoint === '') {
@@ -45,19 +39,11 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    const response = await fetch(`${API_URL}${endpoint}/${id}`).then(
-      async (response) => {
-        if (response.ok) {
-          return await response.json()
-        } else {
-          throw new Error('Error')
-        }
-      }
-    )
+    const response = await endpointService.getById(id)
     await responseSuccess(res, `Get by id ${endpoint} success`, response, 200)
     return
-  } catch (error) {
-    await responseError(res, `Get by id ${req.query.endpoint as string} failed`, error)
+  } catch (error: any) {
+    await responseError(res, error?.message, null)
   }
 }
 
@@ -65,6 +51,7 @@ export const getFilter = async (req: Request, res: Response): Promise<void> => {
   try {
     const endpoint = req.query.endpoint as string
     const filters = req.query.filter as Record<string, string>
+    const endpointService = new EndpointService(endpoint as Endpoint)
 
     // Check if endpoint is provided
     if (typeof req.query.endpoint === 'undefined' || req.query.endpoint === '') {
@@ -78,28 +65,10 @@ export const getFilter = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    // Check if filter is an object not multiple
-    if (Object.keys(filters).length !== 1) {
-      await responseError(res, 'A single filter must be provided', null, 400) // Bad request
-      return
-    }
-
-    const [key, value] = Object.entries(filters)[0] // Destructure filter object to get key and value
-    const filter = `filter?key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}` // Encode key and value to URI
-
-    const response = await fetch(`${API_URL}${endpoint}/${filter}`).then(
-      async (response) => {
-        if (response.ok) {
-          return await response.json()
-        } else {
-          throw new Error('Error')
-        }
-      }
-    )
-
+    const response = await endpointService.getFilter(filters)
     await responseSuccess(res, `Filtered data from ${endpoint} success`, response, 200)
     return
-  } catch (error) {
-    await responseError(res, `Failed to filter data from ${req.query.endpoint as string}`, error)
+  } catch (error: any) {
+    await responseError(res, error.message, null, error.status)
   }
 }
