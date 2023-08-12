@@ -17,7 +17,8 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
     await responseSuccess(res, `Get all ${endpoint} success`, response, 200)
     return
   } catch (error: any) {
-    await responseError(res, error?.message, null)
+    const endpoint = req.query.endpoint as string
+    await responseError(res, `Get all ${endpoint} error`, error?.message, error?.status)
   }
 }
 
@@ -43,7 +44,8 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
     await responseSuccess(res, `Get by id ${endpoint} success`, response, 200)
     return
   } catch (error: any) {
-    await responseError(res, error?.message, null)
+    const endpoint = req.query.endpoint as string
+    await responseError(res, `Get by id ${endpoint} error`, error?.message, error?.status)
   }
 }
 
@@ -69,6 +71,7 @@ export const getFilter = async (req: Request, res: Response): Promise<void> => {
     await responseSuccess(res, `Filtered data from ${endpoint} success`, response, 200)
     return
   } catch (error: any) {
-    await responseError(res, error.message, null, error.status)
+    const endpoint = req.query.endpoint as string
+    await responseError(res, `Filtered data from ${endpoint} error`, error?.message, error?.status)
   }
 }
