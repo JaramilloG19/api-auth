@@ -3,15 +3,27 @@ import { type Endpoint } from '../types/endpoint'
 import { CustomError } from '../utils/customError'
 
 export class EndpointService {
+  private readonly params: string
   private readonly endpoint: Endpoint
 
-  constructor (endpoint: Endpoint) {
+  constructor (endpoint: Endpoint, queryParams?: Record<string, any>) {
     this.endpoint = endpoint
+    this.params = this.queryParams(queryParams)
+  }
+
+  private queryParams (params?: Record<string, any>): string {
+    if (params === undefined) return ''
+    const paramsArray = []
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) paramsArray.push(`${encodeURIComponent(key)}=${encodeURIComponent(value.toString())}`)
+    }
+
+    return (paramsArray.length > 0) ? `?${paramsArray.join('&')}` : ''
   }
 
   public async getAll (): Promise<any> {
     try {
-      const response = await fetch(`${API_URL}${this.endpoint}`).then(
+      const response = await fetch(`${API_URL}${this.endpoint}${this.params}`).then(
         async (response) => {
           if (response.ok) {
             return await response.json()
@@ -53,9 +65,10 @@ export class EndpointService {
       }
 
       const [key, value] = Object.entries(filters)[0] // Destructure filter object to get key and value
-      const filter = `filter?key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}` // Encode key and value to URI
+      const filter = `filter?key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}`// Encode key and value to URI
+      const params = filter.includes('?') ? this.params.replace('?', '&') : this.params // Replace the first '?' with '&' if filter already contains '?'.
 
-      const response = await fetch(`${API_URL}${this.endpoint}/${filter}`).then(
+      const response = await fetch(`${API_URL}${this.endpoint}/${filter}${params}`).then(
         async (response) => {
           if (response.ok) {
             return await response.json()
