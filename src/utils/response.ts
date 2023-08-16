@@ -25,11 +25,12 @@ export const responseSuccess = async (
   data: Record<string, any>,
   status: number = 200
 ): Promise<void> => {
+  const { response } = data // Destructuring data to response
   res.status(status)
   res.json({
     status: true,
     message,
-    data,
+    response,
     statusCode: status
   })
 }
