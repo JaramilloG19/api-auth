@@ -6,8 +6,8 @@ import { responseSuccess, responseError } from '../utils/response'
 export const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
     const endpoint = req.query.endpoint as string
-    const { limit, skip } = req.query
-    const endpointService = new EndpointService(endpoint as Endpoint, { limit, skip })
+    const { limit, cursor } = req.query
+    const endpointService = new EndpointService(endpoint as Endpoint, { limit, cursor })
 
     // Check if endpoint is provided
     if (req.query.endpoint === undefined || req.query.endpoint === '') {
