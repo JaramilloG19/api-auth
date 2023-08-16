@@ -1,12 +1,17 @@
-import { API_URL } from '../config/environment'
-import { type Endpoint } from '../types/endpoint'
 import { CustomError } from '../utils/customError'
+import { API_URL, API_TOKEN } from '../config/environment'
+import { type HttpHeaders, type Endpoint } from '../types/endpoint'
 
 export class EndpointService {
   private readonly params: string
   private readonly endpoint: Endpoint
+  private readonly headers: HttpHeaders
 
-  constructor (endpoint: Endpoint, queryParams?: Record<string, any>) {
+  constructor (endpoint: Endpoint, queryParams?: Record<string, any>, headers: HttpHeaders = {
+    Authorization: `Bearer ${API_TOKEN}`,
+    'Content-Type': 'application/json'
+  }) {
+    this.headers = headers
     this.endpoint = endpoint
     this.params = this.queryParams(queryParams)
   }
@@ -17,13 +22,16 @@ export class EndpointService {
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== null) paramsArray.push(`${encodeURIComponent(key)}=${encodeURIComponent(value.toString())}`)
     }
-
     return (paramsArray.length > 0) ? `?${paramsArray.join('&')}` : ''
   }
 
   public async getAll (): Promise<any> {
     try {
-      const response = await fetch(`${API_URL}${this.endpoint}${this.params}`).then(
+      console.log('🚀 ~ file: endpoint.s.ts:23 ~ EndpointService ~ getAll ~ this.params', `${API_URL}${this.endpoint}${this.params}`)
+      const response = await fetch(`${API_URL}${this.endpoint}${this.params}`, {
+        method: 'GET',
+        headers: this.headers
+      }).then(
         async (response) => {
           if (response.ok) {
             return await response.json()
@@ -41,7 +49,10 @@ export class EndpointService {
 
   public async getById (id: string): Promise<any> {
     try {
-      const response = await fetch(`${API_URL}${this.endpoint}/${id}`).then(
+      const response = await fetch(`${API_URL}${this.endpoint}/${id}`, {
+        method: 'GET',
+        headers: this.headers
+      }).then(
         async (response) => {
           if (response.ok) {
             return await response.json()
@@ -68,7 +79,12 @@ export class EndpointService {
       const filter = `filter?key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}`// Encode key and value to URI
       const params = filter.includes('?') ? this.params.replace('?', '&') : this.params // Replace the first '?' with '&' if filter already contains '?'.
 
-      const response = await fetch(`${API_URL}${this.endpoint}/${filter}${params}`).then(
+      const response = await fetch(`${API_URL}${this.endpoint}/${filter}${params}`,
+        {
+          method: 'GET',
+          headers: this.headers
+        }
+      ).then(
         async (response) => {
           if (response.ok) {
             return await response.json()
